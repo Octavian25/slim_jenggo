@@ -12,18 +12,18 @@ $cekAPIKey = function(Request $request, Response $response, $next){
         return $response->withJson(["status" => "API Key required"], 401);
     }
     
-    $sql = "SELECT * FROM users WHERE api_key=:api_key";
+    $sql = "SELECT * FROM users WHERE token=:token";
     $stmt = $this->db->prepare($sql);
-    $stmt->execute([":api_key" => $key]);
+    $stmt->execute([":token" => $key]);
     
     if($stmt->rowCount() > 0){
         $result = $stmt->fetch();
-        if($key == $result["api_key"]){
+        if($key == $result["token"]){
         
             // update hit
-            $sql = "UPDATE users SET hit=hit+1 WHERE api_key=:api_key";
+            $sql = "UPDATE users SET hit=hit+1 WHERE token=:token";
             $stmt = $this->db->prepare($sql);
-            $stmt->execute([":api_key" => $key]);
+            $stmt->execute([":token" => $key]);
             
             return $response = $next($request, $response);
         }
@@ -44,7 +44,7 @@ $app->get("/api/barang/all", function (Request $request, Response $response){
     $stmt = $this->db->prepare($sql);
     $stmt->execute();
     $result = $stmt->fetchAll();
-    return $response->withJson(["status" => "success", "data" => $result], 200);
+    return $response->withJson($result, 200);
 });
 $app->get("/api/barang/id/{id}", function (Request $request, Response $response, array $args){
     $id = $args["id"];
@@ -52,11 +52,10 @@ $app->get("/api/barang/id/{id}", function (Request $request, Response $response,
     $stmt = $this->db->prepare($sql);
     $stmt->execute([":id" => $id]);
     $result = $stmt->fetch();
-    return $response->withJson(["status" => "success", "data" => $result], 200);
+    return $response->withJson($result, 200);
 });
 $app->post("/api/addBarang",function (Request $request, Response $response){
-    if($request->isPost()){
-        $sql = "INSERT INTO tm_barang (id_barang, nama_barang, qty, harga) VALUES (:id_barang,:nama_barang,:qty,:harga)";
+    $sql = "INSERT INTO tm_barang (id_barang, nama_barang, qty, harga) VALUES (:id_barang,:nama_barang,:qty,:harga)";
     $stmt = $this->db->prepare($sql);
     $param = $request->getParsedBody();
     $data = [
@@ -67,15 +66,35 @@ $app->post("/api/addBarang",function (Request $request, Response $response){
     ];
 
     if($stmt->execute($data)){
-        return $response->withJson(["status" => "success", "data" => "1"], 200);
+        return $response->withJson(["status" => "success"], 200);
     } else {
-        return $response->withJson(["status" => "failed", "data" => "0"], 200);
-    }
-    } else {
-        return "GET";
+        return $response->withJson(["status" => "failed"], 200);
     }
 })->add($cekAPIKey);
+$app->put("/api/editBarang/{id}",  function (Request $request, Response $response, array $args){
+    $id = $args["id"];
+    $sql = "UPDATE tm_barang SET nama_barang=:nama_barang,qty=:qty,harga=:harga WHERE id_barang=:id";
+    $stmt = $this->db->prepare($sql);
+    $param = $request->getParsedBody();
+    $data =[
+        ":id" => $id,
+        ":nama_barang" => $param["nama_barang"],
+        ":qty" => $param["qty"],
+        ":harga" => $param["harga"]
+    ];
+    $result = $stmt->execute($data);
+    return $response->withJson(["status" => "success"], 200);
 
+});
+
+$app->delete("/api/deleteBarang/{id}", function (Request $request, Response $response, array $args){
+    $id = $args["id"];
+    $sql = "DELETE FROM tm_barang WHERE id_barang=:id_barang";
+    $stmt = $this->db->prepare($sql);
+    $result = $stmt->execute([":id_barang" => $id]);
+    return $response->withJson(["status" => "success"], 200);
+
+});
 
 function autonumber($id_terakhir, $panjang_kode, $panjang_angka) {
  

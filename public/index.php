@@ -32,6 +32,11 @@ $middleware($app);
 // $routes($app);
 require __DIR__ . '/../src/barang.php';
 require  __DIR__ .'/../src/login.php';
+require  __DIR__ .'/../src/bahan_baku.php';
+require  __DIR__ .'/../src/absensi.php';
+require  __DIR__ .'/../src/pegawai.php';
+require  __DIR__ .'/../src/menu.php';
+require  __DIR__ .'/../src/cabang.php';
 
 
 // Run app
