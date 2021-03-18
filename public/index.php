@@ -37,6 +37,7 @@ require  __DIR__ .'/../src/absensi.php';
 require  __DIR__ .'/../src/pegawai.php';
 require  __DIR__ .'/../src/menu.php';
 require  __DIR__ .'/../src/cabang.php';
+require  __DIR__ .'/../src/operasional.php';
 
 
 // Run app

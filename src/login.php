@@ -11,12 +11,13 @@ $app->post("/api/login", function (Request $request, Response $response){
     $param = $request->getParsedBody();
     $sql = "SELECT * FROM users WHERE user_id=:user_id AND password=:password";
     $stmt = $this->db->prepare($sql);
-    $result = $stmt->execute([":user_id" => $param["user_id"],":password" => $param["password"]]);
+    $result1 = $stmt->execute([":user_id" => $param["user_id"],":password" => $param["password"]]);
+    $datanya = $stmt->fetch();
     $token = bin2hex(random_bytes(20));
     $update = "UPDATE users SET token=:token WHERE user_id=:user_id";
     $stmt2 = $this->db->prepare($update);
     $result = $stmt2->execute([":token" => $token, ":user_id" => $param["user_id"]]);
-    return $response->withJson(["status" => "success", "data" => $result, "token" => $token ], 200);
+    return $response->withJson(["status" => "success", "data" => $result, "token" => $token, "id_cabang" => $datanya["id_cabang"] ], 200);
 });
 
 $app->post("/api/register", function (Request $request, Response $response){

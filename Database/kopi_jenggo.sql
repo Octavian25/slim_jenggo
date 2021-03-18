@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 08 Mar 2021 pada 02.11
+-- Waktu pembuatan: 13 Mar 2021 pada 00.22
 -- Versi server: 10.4.17-MariaDB
--- Versi PHP: 8.0.0
+-- Versi PHP: 7.4.14
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -87,7 +87,30 @@ CREATE TABLE `tm_menu` (
 --
 
 INSERT INTO `tm_menu` (`id_menu`, `id_barang`, `nama_barang`, `harga_barang`, `id_cabang`) VALUES
-('MN001', 'TB001', 'CHOCHO LATTE', 17000, 'CB001');
+('MN001', 'TB001', 'CHOCHO LATTE 2', 20000, 'CB002');
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `tm_operasional`
+--
+
+CREATE TABLE `tm_operasional` (
+  `keterangan` varchar(255) NOT NULL,
+  `harga` double NOT NULL,
+  `id_cabang` varchar(50) NOT NULL,
+  `input_by` varchar(50) NOT NULL,
+  `id_operasional` int(11) NOT NULL,
+  `tanggal` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data untuk tabel `tm_operasional`
+--
+
+INSERT INTO `tm_operasional` (`keterangan`, `harga`, `id_cabang`, `input_by`, `id_operasional`, `tanggal`) VALUES
+('BAYAR WIFI INDIHOME', 260000, 'CB001', 'octa25', 3, '2021-03-12'),
+('BAYAR WIFI INDIHOME', 260000, 'CB001', 'octa25', 4, '2021-03-12');
 
 -- --------------------------------------------------------
 
@@ -122,19 +145,6 @@ CREATE TABLE `tt_detail_barang` (
   `detail_barang` varchar(50) NOT NULL,
   `id_menu` varchar(50) NOT NULL,
   `qty` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
-
---
--- Struktur dari tabel `tt_detail_barang_order_bahan_baku`
---
-
-CREATE TABLE `tt_detail_barang_order_bahan_baku` (
-  `detail_barang` varchar(50) NOT NULL,
-  `id_barang` varchar(50) NOT NULL,
-  `qty` int(11) NOT NULL,
-  `total_harga` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -195,10 +205,41 @@ CREATE TABLE `tt_operasional` (
 
 CREATE TABLE `tt_order_bahan_baku` (
   `id_order` varchar(50) NOT NULL,
-  `tanggal_order` date NOT NULL,
+  `tanggal` date NOT NULL,
   `id_cabang` varchar(50) NOT NULL,
-  `detail_barang` varchar(50) NOT NULL
+  `no_faktur` varchar(50) NOT NULL,
+  `status` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data untuk tabel `tt_order_bahan_baku`
+--
+
+INSERT INTO `tt_order_bahan_baku` (`id_order`, `tanggal`, `id_cabang`, `no_faktur`, `status`) VALUES
+('c90f8031-6a8e-427c-b48e-0063abe0626c', '2021-03-12', 'CB001', 'c90f8031-6a8e-427c-b48e-0063abe0626c', 'menunggu');
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `tt_order_bahan_baku_detail`
+--
+
+CREATE TABLE `tt_order_bahan_baku_detail` (
+  `no_faktur` varchar(50) NOT NULL,
+  `id_barang` varchar(50) NOT NULL,
+  `qty` int(11) NOT NULL,
+  `total_harga` int(11) NOT NULL,
+  `id_order` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data untuk tabel `tt_order_bahan_baku_detail`
+--
+
+INSERT INTO `tt_order_bahan_baku_detail` (`no_faktur`, `id_barang`, `qty`, `total_harga`, `id_order`) VALUES
+('c90f8031-6a8e-427c-b48e-0063abe0626c', 'TB001', 5, 75000, 4),
+('c90f8031-6a8e-427c-b48e-0063abe0626c', 'TB002', 5, 100000, 5),
+('c90f8031-6a8e-427c-b48e-0063abe0626c', 'TB003', 5, 1000000, 6);
 
 -- --------------------------------------------------------
 
@@ -214,7 +255,7 @@ CREATE TABLE `users` (
   `created_at` varchar(255) NOT NULL,
   `last_login` varchar(255) NOT NULL,
   `id_cabang` varchar(50) NOT NULL,
-  `api_key` varchar(255) NOT NULL,
+  `token` varchar(255) NOT NULL,
   `hit` int(11) NOT NULL,
   `password` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -223,8 +264,8 @@ CREATE TABLE `users` (
 -- Dumping data untuk tabel `users`
 --
 
-INSERT INTO `users` (`id`, `user_id`, `user_name`, `level`, `created_at`, `last_login`, `id_cabang`, `api_key`, `hit`, `password`) VALUES
-(1, 'octa25', 'octavian', 'owner', '03-04-202', '03-04-202', 'CB001', '12345', 31, '123');
+INSERT INTO `users` (`id`, `user_id`, `user_name`, `level`, `created_at`, `last_login`, `id_cabang`, `token`, `hit`, `password`) VALUES
+(1, 'octa25', 'octavian', 'owner', '03-04-202', '03-04-202', 'CB001', '405a9f8b02ca77137c53f17dfb65345dd5bed827', 31, '123');
 
 --
 -- Indexes for dumped tables
@@ -251,6 +292,12 @@ ALTER TABLE `tm_menu`
   ADD KEY `id_cabang` (`id_cabang`);
 
 --
+-- Indeks untuk tabel `tm_operasional`
+--
+ALTER TABLE `tm_operasional`
+  ADD PRIMARY KEY (`id_operasional`);
+
+--
 -- Indeks untuk tabel `tm_pegawai`
 --
 ALTER TABLE `tm_pegawai`
@@ -263,13 +310,6 @@ ALTER TABLE `tm_pegawai`
 ALTER TABLE `tt_detail_barang`
   ADD PRIMARY KEY (`detail_barang`),
   ADD KEY `id_menu` (`id_menu`);
-
---
--- Indeks untuk tabel `tt_detail_barang_order_bahan_baku`
---
-ALTER TABLE `tt_detail_barang_order_bahan_baku`
-  ADD PRIMARY KEY (`detail_barang`),
-  ADD KEY `id_barang` (`id_barang`);
 
 --
 -- Indeks untuk tabel `tt_detail_pegawai_absensi`
@@ -301,9 +341,15 @@ ALTER TABLE `tt_operasional`
 -- Indeks untuk tabel `tt_order_bahan_baku`
 --
 ALTER TABLE `tt_order_bahan_baku`
+  ADD PRIMARY KEY (`id_order`);
+
+--
+-- Indeks untuk tabel `tt_order_bahan_baku_detail`
+--
+ALTER TABLE `tt_order_bahan_baku_detail`
   ADD PRIMARY KEY (`id_order`),
-  ADD KEY `detail_barang` (`detail_barang`),
-  ADD KEY `id_cabang` (`id_cabang`);
+  ADD KEY `id_barang` (`id_barang`),
+  ADD KEY `no_faktur` (`no_faktur`);
 
 --
 -- Indeks untuk tabel `users`
@@ -315,6 +361,18 @@ ALTER TABLE `users`
 --
 -- AUTO_INCREMENT untuk tabel yang dibuang
 --
+
+--
+-- AUTO_INCREMENT untuk tabel `tm_operasional`
+--
+ALTER TABLE `tm_operasional`
+  MODIFY `id_operasional` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT untuk tabel `tt_order_bahan_baku_detail`
+--
+ALTER TABLE `tt_order_bahan_baku_detail`
+  MODIFY `id_order` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT untuk tabel `users`
@@ -346,12 +404,6 @@ ALTER TABLE `tt_detail_barang`
   ADD CONSTRAINT `tt_detail_barang_ibfk_1` FOREIGN KEY (`id_menu`) REFERENCES `tm_menu` (`id_menu`);
 
 --
--- Ketidakleluasaan untuk tabel `tt_detail_barang_order_bahan_baku`
---
-ALTER TABLE `tt_detail_barang_order_bahan_baku`
-  ADD CONSTRAINT `tt_detail_barang_order_bahan_baku_ibfk_1` FOREIGN KEY (`id_barang`) REFERENCES `tm_barang` (`id_barang`);
-
---
 -- Ketidakleluasaan untuk tabel `tt_ebsensi`
 --
 ALTER TABLE `tt_ebsensi`
@@ -367,7 +419,13 @@ ALTER TABLE `tt_head_barang`
 -- Ketidakleluasaan untuk tabel `tt_order_bahan_baku`
 --
 ALTER TABLE `tt_order_bahan_baku`
-  ADD CONSTRAINT `tt_order_bahan_baku_ibfk_1` FOREIGN KEY (`detail_barang`) REFERENCES `tt_detail_barang_order_bahan_baku` (`detail_barang`);
+  ADD CONSTRAINT `tt_order_bahan_baku_ibfk_1` FOREIGN KEY (`no_faktur`) REFERENCES `tt_order_bahan_baku_detail` (`no_faktur`);
+
+--
+-- Ketidakleluasaan untuk tabel `tt_order_bahan_baku_detail`
+--
+ALTER TABLE `tt_order_bahan_baku_detail`
+  ADD CONSTRAINT `tt_order_bahan_baku_detail_ibfk_1` FOREIGN KEY (`id_barang`) REFERENCES `tm_barang` (`id_barang`);
 
 --
 -- Ketidakleluasaan untuk tabel `users`

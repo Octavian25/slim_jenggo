@@ -7,7 +7,7 @@ use Ramsey\Uuid\Uuid;
 
 
 $container = $app->getContainer();
-$app->post("/api/orderBahan", function (Request $request, Response $response){
+$app->post("/api/bahan-baku/orderBahan", function (Request $request, Response $response){
     $param = $request->getParsedBody();
     $sql = "INSERT INTO tt_order_bahan_baku(id_order, tanggal, id_cabang, no_faktur, status) VALUES (:id,:tanggal,:id_cabang,:no_faktur,:status)";
     $stmt = $this->db->prepare($sql);
@@ -39,4 +39,19 @@ $app->post("/api/orderBahan", function (Request $request, Response $response){
     }
     $result3 = $stmt->execute($data);
     return $response->withJson(["status" => "success", "data" => $result3], 200);
+});
+
+
+$app->get("/api/bahan-baku/all", function (Request $request, Response $response){
+    $sql = "SELECT * FROM `tt_order_bahan_baku`";
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute();
+    $result = $stmt->fetchAll();
+    $sql2 = "SELECT * FROM tt_order_bahan_baku_detail WHERE no_faktur=:no_faktur";
+    $stmt2 = $this->db->prepare($sql2);
+    $stmt2->execute([
+        ":no_faktur" => $result[0]["no_faktur"]
+    ]);
+    $result2 = $stmt2->fetch(all);
+    return $response->withJson($result == [] ? "Data Kosong" : ["tanggal" => $result[0]["tanggal"], "id_cabang" => $result["id_cabang"], "no_faktur" => $result["no_faktur"], "status" => $result["result"], "detail_barang" => $result2], 200);
 });
